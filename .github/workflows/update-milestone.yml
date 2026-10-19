@@ -12,9 +12,11 @@ permissions:
   issues: write        # milestones são editadas pela API de issues
   pull-requests: read
 
-# Evita que dois merges simultâneos sobrescrevam a mesma milestone
+# Evita que dois merges simultâneos sobrescrevam a mesma milestone.
+# Só PRs mergeados com milestone entram no grupo da milestone; os demais (que o job
+# ignora) ficam em grupos próprios para não cancelar uma execução pendente na fila.
 concurrency:
-  group: milestone-${{ github.event.pull_request.milestone.number || 'none' }}
+  group: ${{ github.event.pull_request.merged && github.event.pull_request.milestone && format('milestone-{0}', github.event.pull_request.milestone.number) || format('skip-{0}', github.run_id) }}
   cancel-in-progress: false
 
 jobs:
